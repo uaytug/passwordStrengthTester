@@ -1,0 +1,84 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: black;
+  }
+  
+  #app {
+    text-align: center;
+  }
+  
+  h1 {
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+  }
+  
+  input[type="password"] {
+    padding: 10px;
+    margin-top: 10px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+    background-color: transparent;
+    color: #fff;
+  }
+  
+  button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #00FF00;
+    color: #000;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  button:hover {
+    background-color: #00CC00;
+  }
+  
+  p {
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    margin-top: 20px;
+  }
+  
+  .bar {
+    width: 20px;
+    height: 10px;
+    margin: 0 2px;
+    display: inline-block;
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  }
+  
+  /* Color classes remain the same */
+  .red {
+    background-color: #ff6b6b; /* Red color */
+  }
+  
+  .orange {
+    background-color: #ff9f43; /* Orange color */
+  }
+  
+  .yellow {
+    background-color: #feca57; /* Yellow color */
+  }
+  
+  .lightgreen {
+    background-color: #1dd1a1; /* Light green color */
+  }
+  
+  .green {
+    background-color: #10ac84; /* Green color */
+  }
+  

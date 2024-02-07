@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Strength Tester</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <h1>Password Strength Tester</h1>
+  <input type="password" v-model="password" @input="checkPassword" placeholder="Enter your password">
+  <div class="strength-bars">
+    <div v-for="(bar, index) in strengthBars" :key="index" :class="['bar', bar.color]"></div>
+  </div>
+  <p v-if="passwordStrength !== ''">Password Strength: {{ passwordStrength }}</p>
+  <p v-if="isCommonPassword">Warning: This password is commonly used. Please choose a stronger one.</p>
+  <p v-if="estimatedCrackTime !== ''">Estimated Time to Crack: {{ estimatedCrackTime }}</p>
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      password: '',
+      passwordStrength: '',
+      strengthBars: [],
+      isCommonPassword: false,
+      commonPasswords: [],
+      estimatedCrackTime: ''
+    },
+    mounted() {
+      this.loadCommonPasswords();
+    },
+    methods: {
+      loadCommonPasswords() {
+        fetch('https://gist.githubusercontent.com/JohnnyUrosevic/f0aafe33bfdd07a7c27d047b4bcf114e/raw/b7f14e20b84753b6c0e43f000f5a6a0632206d0d/10_million_password_list_top_1000000.txt')
+          .then(response => response.text())
+          .then(data => {
+            // Split the data into an array of passwords
+            this.commonPasswords = data.split('\n');
+          })
+          .catch(error => {
+            console.error('Error loading common passwords:', error);
+          });
+      },
+      checkPassword() {
+        const password = this.password;
+        const lowercaseRegex = /[a-z]/;
+        const uppercaseRegex = /[A-Z]/;
+        const digitRegex = /[0-9]/;
+        const specialCharRegex = /[^a-zA-Z0-9]/;
+
+        let strength = 0;
+
+        if (password.length >= 8 && password.length <= 20) {
+          strength += 2;
+        } else if (password.length > 20) {
+          strength += 3;
+        }
+
+        if (lowercaseRegex.test(password)) {
+          strength++;
+        }
+
+        if (uppercaseRegex.test(password)) {
+          strength++;
+        }
+
+        if (digitRegex.test(password)) {
+          strength++;
+        }
+
+        if (specialCharRegex.test(password)) {
+          strength++;
+        }
+
+        const sequentialRegex = /abc|123|xyz|qwe|789/;
+        if (!sequentialRegex.test(password.toLowerCase())) {
+          strength++;
+        }
+
+        const repeatedCharRegex = /([a-zA-Z0-9])\1{2,}/;
+        if (!repeatedCharRegex.test(password)) {
+          strength++;
+        }
+
+        this.isCommonPassword = this.commonPasswords.includes(password.toLowerCase());
+
+        let passwordStrength = '';
+        if (strength <= 2) {
+          passwordStrength = 'Very Weak';
+        } else if (strength <= 4) {
+          passwordStrength = 'Weak';
+        } else if (strength <= 6) {
+          passwordStrength = 'Fair';
+        } else if (strength <= 8) {
+          passwordStrength = 'Strong';
+        } else {
+          passwordStrength = 'Very Strong';
+        }
+        this.passwordStrength = passwordStrength;
+
+        this.strengthBars = [];
+        const numBars = Math.ceil(strength / 2);
+        for (let i = 0; i < 5; i++) {
+          if (i < numBars) {
+            this.strengthBars.push({ color: passwordStrength === 'Very Weak' ? 'red' :
+                                      passwordStrength === 'Weak' ? 'orange' :
+                                      passwordStrength === 'Fair' ? 'yellow' :
+                                      passwordStrength === 'Strong' ? 'lightgreen' : 'green' });
+          } else {
+            this.strengthBars.push({ color: '' });
+          }
+        }
+
+        this.estimatedCrackTime = this.estimateCrackTime(password, strength);
+      },
+      estimateCrackTime(password, strength) {
+        // Define assumptions
+        const averageAttemptsPerSecond = 1e6;
+        const totalCharacters = 94;
+        const passwordLength = password.length;
+        
+        const totalCombinations = Math.pow(totalCharacters, passwordLength);
+        
+        const estimatedTimeInSeconds = totalCombinations / averageAttemptsPerSecond;
+
+        return this.formatTime(estimatedTimeInSeconds);
+      },
+      formatTime(seconds) {
+        const years = Math.floor(seconds / 31536000);
+        const days = Math.floor((seconds % 31536000) / 86400);
+        const hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+        const minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+        const remainingSeconds = Math.floor((((seconds % 31536000) % 86400) % 3600) % 60);
+
+        // Format the time string
+        let timeString = '';
+        if (years > 0) {
+          timeString += years + ' year(s) ';
+        }
+        if (days > 0) {
+          timeString += days + ' day(s) ';
+        }
+        if (hours > 0) {
+          timeString += hours + ' hour(s) ';
+        }
+        if (minutes > 0) {
+          timeString += minutes + ' minute(s) ';
+        }
+        if (remainingSeconds > 0) {
+          timeString += remainingSeconds + ' second(s)';
+        }
+
+        return timeString;
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
