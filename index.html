@@ -119,7 +119,6 @@
         this.estimatedCrackTime = this.estimateCrackTime(password, strength);
       },
       estimateCrackTime(password, strength) {
-        // Define assumptions
         const averageAttemptsPerSecond = 1e6;
         const totalCharacters = 94;
         const passwordLength = password.length;
