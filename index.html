@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Password Strength Tester</title>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,6 +19,8 @@
   <p v-if="passwordStrength !== ''">Password Strength: {{ passwordStrength }}</p>
   <p v-if="isCommonPassword">Warning: This password is commonly used. Please choose a stronger one.</p>
   <p v-if="estimatedCrackTime !== ''">Estimated Time to Crack: {{ estimatedCrackTime }}</p>
+  <p v-if="password !== '' && passwordStrength === ''">Checking password strength...</p>
+  <p v-if="password === ''">Please enter a password</p>
 </div>
 
 <script>
@@ -118,17 +121,16 @@
 
         this.estimatedCrackTime = this.estimateCrackTime(password, strength);
       },
-      estimateCrackTime(password, strength) {
-        const averageAttemptsPerSecond = 1e6;
-        const totalCharacters = 94;
-        const passwordLength = password.length;
-        
-        const totalCombinations = Math.pow(totalCharacters, passwordLength);
-        
-        const estimatedTimeInSeconds = totalCombinations / averageAttemptsPerSecond;
 
-        return this.formatTime(estimatedTimeInSeconds);
-      },
+      estimateCrackTime(password, strength) {
+        if (strength <= 2 || password.length < 8 || this.isCommonPassword) {
+          return 'Less than a second';
+        }
+        else{
+          const result = zxcvbn(password);
+          return this.formatTime(result.crack_times_seconds.offline_slow_hashing_1e4_per_second);
+        }},
+
       formatTime(seconds) {
         const years = Math.floor(seconds / 31536000);
         const days = Math.floor((seconds % 31536000) / 86400);
@@ -136,7 +138,6 @@
         const minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
         const remainingSeconds = Math.floor((((seconds % 31536000) % 86400) % 3600) % 60);
 
-        // Format the time string
         let timeString = '';
         if (years > 0) {
           timeString += years + ' year(s) ';

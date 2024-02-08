@@ -57,28 +57,27 @@ body {
     height: 10px;
     margin: 0 2px;
     display: inline-block;
-    border-radius: 5px; /* Rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
-  /* Color classes remain the same */
   .red {
-    background-color: #ff6b6b; /* Red color */
+    background-color: #ff6b6b; 
   }
   
   .orange {
-    background-color: #ff9f43; /* Orange color */
+    background-color: #ff9f43;
   }
   
   .yellow {
-    background-color: #feca57; /* Yellow color */
+    background-color: #feca57;
   }
   
   .lightgreen {
-    background-color: #1dd1a1; /* Light green color */
+    background-color: #1dd1a1;
   }
   
   .green {
-    background-color: #10ac84; /* Green color */
+    background-color: #10ac84;
   }
   
