@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vue.js ve zxcvbn kütüphanesini kullanan şifre güçlülük testi.">
+    <meta name="keywords" content="password, strength, tester, vue, zxcvbn">
+    <meta name="author" content="Fumea">
+    <link rel="icon" href="../img/logo.png">
+    <title>Şifre Testi</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/style.css">
+  </head>
+
+  <body>
+    <div id="app">
+
+        <h1>Şifre Kuvvet Testi         <a href="en.html" target="_self" title="Translate to English" class="translate"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-translate" viewBox="0 0 16 16">
+          <path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286zm1.634-.736L5.5 3.956h-.049l-.679 2.022z"/>
+          <path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zm7.138 9.995q.289.451.63.846c-.748.575-1.673 1.001-2.768 1.292.178.217.451.635.555.867 1.125-.359 2.08-.844 2.886-1.494.777.665 1.739 1.165 2.93 1.472.133-.254.414-.673.629-.89-1.125-.253-2.057-.694-2.82-1.284.681-.747 1.222-1.651 1.621-2.757H14V8h-3v1.047h.765c-.318.844-.74 1.546-1.272 2.13a6 6 0 0 1-.415-.492 2 2 0 0 1-.94.31"/>
+        </svg></a></h1>
+        <p>Şifreniz ne kadar güvenli ve hackerler ne kadar zamanda şifrenizi kırabilir test edin.</p>
+        <input class = "textBox" type="password" v-model="password" @input="checkPassword" placeholder="Şifrenizi girin">
+        <div class="strengthBars">
+            <div class="strengthBar" v-for="bar in strengthBars" :style="{ backgroundColor: bar.color, width: bar.width }"></div>
+        </div>    
+        <p v-if="passwordStrength !== ''">Şifre güvenliği: {{ passwordStrength }}</p>
+        <p v-if="isCommonPassword">Uyarı! Şifreniz veritabanında bulundu. Yakın zamanda değiştirin</p>
+        <p v-if="estimatedCrackTime !== ''">Hackerler şifrenizi {{ estimatedCrackTime }} kırabilir </p>
+        <p v-if="password !== '' && passwordStrength === ''">Şifrenin güvenliği test ediliyor</p>
+        <p v-if="password === ''">Lütfen şifrenizi girin</p>
+        <p class="githubLink" ><a rel="noreferrer" href="https://github.com/uaytug/passwordStrengthTester" target="_blank" style="color: white; ">GitHub'da gör</a></p>
+    </div>
+    
+    <footer>
+      <p class="footerLink"><a rel="noreferrer" href="http://uaytug.dev" target="_blank" style="color: aquamarine;">UAYTUG</a> Tarafından Yapıldı</p>
+    </footer>
+
+    <script>
+      new Vue({
+        el: '#app',
+        data: {
+          password: '',
+          passwordStrength: '',
+          strengthBars: [],
+          isCommonPassword: false,
+          commonPasswords: [],
+          estimatedCrackTime: ''
+        },
+        mounted() {
+          this.loadCommonPasswords();
+        },
+        methods: {
+          loadCommonPasswords() {
+            fetch('https://raw.githubusercontent.com/LuNiZz/turkce-wordlist/master/wordlist.txt')
+              .then(response => response.text())
+              .then(data => {
+                this.commonPasswords = data.split('\n');
+              })
+              .catch(error => {
+                console.error('Veritabanındaki şifreler yüklenirken hata oluştu', error);
+              });
+          },
+          checkPassword() {
+            const password = this.password;
+            const lowercaseRegex = /[a-z]/;
+            const uppercaseRegex = /[A-Z]/;
+            const digitRegex = /[0-9]/;
+            const specialCharRegex = /[^a-zA-Z0-9]/;
+
+            let strength = 0;
+
+            if(password.length === 0){
+              this.passwordStrength = '';
+              this.strengthBars = [];
+              this.estimatedCrackTime = '';
+              return;
+            }
+
+            if (password.length >= 8 && password.length <= 20) {
+              strength += 2;
+            } else if (password.length > 20) {
+              strength += 3;
+            }
+
+            if (lowercaseRegex.test(password)) {
+              strength++;
+            }
+
+            if (uppercaseRegex.test(password)) {
+              strength++;
+            }
+
+            if (digitRegex.test(password)) {
+              strength++;
+            }
+
+            if (specialCharRegex.test(password)) {
+              strength++;
+            }
+
+            const sequentialRegex = /abc|123|xyz|qwe|789/;
+            if (!sequentialRegex.test(password.toLowerCase())) {
+              strength++;
+            }
+
+            const repeatedCharRegex = /([a-zA-Z0-9])\1{2,}/;
+            if (!repeatedCharRegex.test(password)) {
+              strength++;
+            }
+
+            this.isCommonPassword = this.commonPasswords.includes(password.toLowerCase());
+
+            let passwordStrength = '';
+            if (password === '') {
+              passwordStrength = '';
+            } else if (this.isCommonPassword || strength <= 2 || password.length < 8) {
+              passwordStrength = 'Çok Zayıf';
+            } else if (strength <= 4 && password.length >= 8) {
+              passwordStrength = 'Zayıf';
+            } else if (strength <= 6 && password.length >= 8) {
+              passwordStrength = 'İdare Eder';
+            } else if (strength <= 8 && password.length >= 8) {
+              passwordStrength = 'Güçlü';
+            } else if(strength > 8 && password.length >= 8){
+              passwordStrength = 'Çok Güçlü';
+            } else{
+              passwordStrength = 'Çok Zayıf';
+            }
+
+            this.passwordStrength = passwordStrength;
+            this.showStrengthBars(passwordStrength);
+            this.estimatedCrackTime = this.estimateCrackTime(password, strength);
+          },
+
+          showStrengthBars(passwordStrength) {
+            const strengthMap = {
+                'Çok Zayıf': [{ color: '#ff0000', width: '20%' }],
+                'Zayıf': [{ color: '#ff6600', width: '40%' }],
+                'İdare Eder': [{ color: '#ffcc00', width: '60%' }],
+                'Güçlü': [{ color: '#99ff33', width: '80%' }],
+                'Çok Güçlü': [{ color: '#00cc00', width: '100%' }]
+            };
+            
+            this.strengthBars = strengthMap[passwordStrength];
+          },
+
+
+          estimateCrackTime(password, strength) {
+            if (strength <= 2 || password.length < 8 || this.isCommonPassword) {
+              return 'Bir saniyenin altında';
+            }
+            else{
+              const result = zxcvbn(password);
+              return this.formatTime(result.crack_times_seconds.offline_slow_hashing_1e4_per_second);
+            }},
+
+          formatTime(seconds) {
+            const years = Math.floor(seconds / 31536000);
+            const days = Math.floor((seconds % 31536000) / 86400);
+            const hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+            const minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+            const remainingSeconds = Math.floor((((seconds % 31536000) % 86400) % 3600) % 60);
+
+            let timeString = '';
+            if (years > 0) {
+              timeString += years + ' yıl ';
+            }
+            if (days > 0) {
+              timeString += days + ' gün ';
+            }
+            if (hours > 0) {
+              timeString += hours + ' saat ';
+            }
+            if (minutes > 0) {
+              timeString += minutes + ' dakika ';
+            }
+            if (remainingSeconds > 0) {
+              timeString += remainingSeconds + ' saniyede';
+            }
+            return timeString;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

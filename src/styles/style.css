@@ -88,6 +88,14 @@ footer{
 
 }
 
+.translate{
+  color: #00CC00;
+  font-family: 'Anonymous Pro', monospace;
+  font-size: 18px;
+  margin-top: 20px;
+  text-decoration: none;
+}
+
 .strengthBars {
   display: flex;
   justify-content: flex-start;
